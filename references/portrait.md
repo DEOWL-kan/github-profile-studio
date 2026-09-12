@@ -76,6 +76,7 @@ python3 make_art.py cut.png --trim --cols 100 --shape --saturation 150 --gamma 1
 | `--edges` | Directional stroke glyphs | Not recommended: they cover the eyes |
 | `--braille` | Braille dots | Not recommended: dot size depends on the viewer's fonts, often tiny and dim |
 | `--mono` | One colour | For a classic monochrome neofetch look |
+| `--font` | The monospaced font `--shape` draws its glyphs with | Off macOS, where Menlo is missing: point it at e.g. `DejaVuSansMono.ttf` |
 
 The colours are lifted for a dark backdrop, so keep the portrait's backdrop dark (design.md).
 
