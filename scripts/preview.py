@@ -26,6 +26,7 @@ CSS_URL = "https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown-{}
 FALLBACK_CSS = ".markdown-body{font-family:-apple-system,'Segoe UI','Noto Sans',Helvetica,Arial,sans-serif;line-height:1.5}" \
                ".markdown-body img{max-width:100%}"
 PAGE = {"light": "#ffffff", "dark": "#0d1117"}
+MOBILE_W = 390  # iPhone 12-16 logical width; --mobile and the help text share it so they cannot drift
 
 
 def for_theme(html, theme):
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     ap.add_argument("out_dir")
     ap.add_argument("--login", help="repo context for relative links (default: gh login)")
     ap.add_argument("--width", type=int, default=830, help="README column width on a desktop profile")
-    ap.add_argument("--mobile", action="store_true", help="also render at a phone's width (390 px)")
+    ap.add_argument("--mobile", action="store_true", help=f"also render at a phone's width ({MOBILE_W} px)")
     a = ap.parse_args()
     src, out = Path(a.profile_dir).resolve(), Path(a.out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -74,7 +75,7 @@ if __name__ == "__main__":
     body = subprocess.run(["gh", "api", "markdown", "-f", "mode=gfm", "-f", f"context={login}/{login}", "-f", f"text={md}"],
                           capture_output=True, text=True, check=True).stdout
     browser = chrome()
-    sizes = [(a.width, "")] + ([(350, "-mobile")] if a.mobile else [])
+    sizes = [(a.width, "")] + ([(MOBILE_W, "-mobile")] if a.mobile else [])
     for theme, (width, tag) in ((t, s) for t in ("light", "dark") for s in sizes):
         try:
             css = urllib.request.urlopen(CSS_URL.format(theme), timeout=10).read().decode()
