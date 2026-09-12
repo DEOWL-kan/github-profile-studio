@@ -54,9 +54,9 @@ MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monos
 SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"
 
 PALETTES = {
-    "dark": {"bg": "#0d1117", "bar": "#161b22", "border": "#30363d", "art": "#8b949e", "text": "#e6edf3",
+    "dark": {"bg": "#0d1117", "bar": "#161b22", "border": "#30363d", "text": "#e6edf3",
              "muted": "#7d8590", "key": "#f0a868", "accent": "#3fc1b7", "pill": "#161b22",},
-    "light": {"bg": "#ffffff", "bar": "#f6f8fa", "border": "#d0d7de", "art": "#57606a", "text": "#1f2328",
+    "light": {"bg": "#ffffff", "bar": "#f6f8fa", "border": "#d0d7de", "text": "#1f2328",
               "muted": "#656d76", "key": "#b45309", "accent": "#0f766e", "pill": "#f6f8fa",},
 }
 
@@ -125,6 +125,12 @@ def count_commits(years, private):
     With private work, add the anonymous count the public sees for it. Without,
     sum only public repositories: a personal token would otherwise count the
     owner's private commits in totalCommitContributions.
+
+    That sum stops at maxRepositories: 100, the API's ceiling for the list, so
+    a year spread over more public repositories than that is undercounted. The
+    year's total cannot stand in for it: a token that reads some of this
+    person's private work would fold those commits into a public number as soon
+    as the private repository falls outside the truncated list.
     """
     if private:
         return sum(y["totalCommitContributions"] + y["restrictedContributionsCount"] for y in years)
