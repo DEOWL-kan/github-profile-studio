@@ -9,6 +9,7 @@ A Claude skill for building a GitHub profile README that fits the person: what t
 - **Copy a style, not a person.** Point at a profile you like. The skill takes it apart — licence, layout, widgets and how each is produced — and rebuilds the look with your own data.
 - **Portrait card.** Turn a photo, a character you choose, or your avatar into a coloured ASCII portrait inside a neofetch-style terminal card, with live GitHub stats refreshed daily by a workflow. It includes tools for cutting figures out of busy artwork and patching gaps.
 - **Widgets and sections.** A catalogue of common blocks (stats, typing headers, skill icons, contribution snakes, blog feeds, project tables), with notes on which are live services and which are generated into your repo.
+- **Look like the strong developer you are.** An audit ranks weak signals (bio, pins, repo hygiene) and surfaces your strongest proof, such as merged PRs into popular projects. The guidance makes real strengths visible, and refuses fake ones like painted contribution graphs or bought stars.
 - **Content with judgement.** It asks what to show and what to keep private, presents projects and contributions clearly, and lists languages from your actual commits.
 - **Real previews and a safe publish.** It renders the README with GitHub's own Markdown API in light and dark at profile width. It publishes only with your approval, then verifies the live page.
 
@@ -25,6 +26,7 @@ Then ask Claude things like:
 - "Use this picture for my profile card"
 - "I like how @someone's profile looks — make mine similar"
 - "Show my open-source contributions but not my company work"
+- "Make my profile look like a serious, senior developer's"
 
 ## Requirements
 
@@ -34,8 +36,8 @@ Then ask Claude things like:
 
 ```
 SKILL.md                  workflow and working principles
-references/               replicate · portrait · components · content · design · publishing
-scripts/                  github_facts · inspect_profile · preview · scan_languages · pixel_map · cutout · fill_paper
+references/               replicate · portrait · components · content · credibility · design · publishing
+scripts/                  github_facts · audit_profile · inspect_profile · preview · scan_languages · pixel_map · cutout · fill_paper
 assets/neofetch-card/     card generator + card.json, image-to-ASCII converter, README, daily workflow
 ```
 

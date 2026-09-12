@@ -1,6 +1,6 @@
 ---
 name: github-profile-studio
-description: Design, build and publish a GitHub profile README that fits the person — what they want to show, the look they like, and how they want to present their projects, experience and contributions. Recreate the style of a profile they admire with their own data; turn a photo, a chosen character or their avatar into a coloured ASCII portrait inside a neofetch-style terminal card with live stats; compose sections and widgets such as stats, typing headers, skill icons, contribution snakes and project showcases; preview in both themes at GitHub's width, then publish the profile repo with their approval. Use this whenever someone wants to create, redesign, polish or copy the style of a GitHub profile page or organisation profile, even if they never say README (also 个人主页, 主页做好看点, 把项目放到主页, 参考别人的主页).
+description: Design, build and publish a GitHub profile README that fits the person — what they want to show, the look they like, and how they want to present their projects, experience and contributions. Recreate the style of a profile they admire with their own data; turn a photo, a chosen character or their avatar into a coloured ASCII portrait inside a neofetch-style terminal card with live stats; compose sections and widgets such as stats, typing headers, skill icons, contribution snakes and project showcases; make real strengths visible so they come across as a strong, credible developer; preview in both themes at GitHub's width, then publish the profile repo with their approval. Use this whenever someone wants to create, redesign, polish or copy the style of a GitHub profile page or organisation profile, even if they never say README (also 个人主页, 主页做好看点, 把项目放到主页, 参考别人的主页, 让我看起来更专业/更厉害).
 ---
 
 # GitHub Profile Studio
@@ -28,6 +28,7 @@ Help a person end up with a GitHub profile they are glad to show: it says what t
 ```bash
 python3 "$SKILL_DIR/scripts/github_facts.py" LOGIN > facts.json   # add --private only to discuss private work
 python3 "$SKILL_DIR/scripts/inspect_profile.py" LOGIN              # their current profile README, if any
+python3 "$SKILL_DIR/scripts/audit_profile.py" LOGIN                # weak signals to fix, strongest proof to feature
 ```
 
 Summarise briefly for the user:
@@ -53,6 +54,7 @@ Ask only what changes the result, and default the rest (content.md):
 | A portrait (photo, character, avatar) in a terminal card with stats | references/portrait.md + `assets/neofetch-card/` |
 | Sections and widgets (stats, typing header, icons, snake, blog feed…) | references/components.md |
 | Mainly to present projects, experience, contributions | references/content.md |
+| To look more impressive, professional or senior | references/credibility.md + `scripts/audit_profile.py` |
 | No idea yet | Render 2–3 quick directions and let them point |
 
 Visual decisions follow references/design.md.
@@ -91,6 +93,7 @@ Only after an explicit yes. Follow references/publishing.md:
 | Path | What it does |
 |---|---|
 | `scripts/github_facts.py` | A person's GitHub facts as JSON; private work reduced to counts unless `--private` |
+| `scripts/audit_profile.py` | Ranks weak profile signals (bio, pins, repo hygiene) and lists the strongest proof to lead with |
 | `scripts/inspect_profile.py` | Takes apart any profile README: licence, layout, components and how each is produced, workflows, assets |
 | `scripts/preview.py` | Renders README.md with GitHub's Markdown API and screenshots light and dark at 830 px |
 | `scripts/scan_languages.py` | Languages the person really wrote, from their own commits in local repos (counts only) |
@@ -98,6 +101,6 @@ Only after an explicit yes. Follow references/publishing.md:
 | `scripts/cutout.py` | Cuts a figure out of busy artwork |
 | `scripts/fill_paper.py` | Paints bare-paper gaps inside a figure with skin colour |
 | `assets/neofetch-card/` | Card generator (`update_profile.py`, `card.json`), image-to-ASCII converter (`make_art.py`), README, daily workflow |
-| `references/*.md` | replicate, portrait, components, content, design, publishing |
+| `references/*.md` | replicate, portrait, components, content, credibility, design, publishing |
 
 Requirements: `gh` (logged in), Python 3 (stdlib only), ImageMagick 7 (`magick`) for image work, Chrome or Chromium for previews, and optionally `rsvg-convert` for quick static renders.
