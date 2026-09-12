@@ -24,6 +24,9 @@ STROKES = "-\\|/"  # outline at 0, 45, 90, 135 degrees; screen y points down
 SX, SY = 3, 5  # samples per cell: a 0.6 x 1.0 cell becomes square samples
 GW, GH = 6, 10  # glyph bitmap per cell for --shape, same 0.6 x 1.0 proportions as the cell
 BRAILLE_BITS = ((0x01, 0x08), (0x02, 0x10), (0x04, 0x20), (0x40, 0x80))  # [dot row][dot col]
+# --shape draws the glyphs it compares against, so it needs a monospaced font.
+# Menlo ships with macOS; elsewhere pass --font (Linux: DejaVuSansMono.ttf).
+FONT = "/System/Library/Fonts/Menlo.ttc"
 
 
 def run_magick(src, pre, *args):
@@ -85,16 +88,22 @@ def braille_cells(gray, cols, rows, bg):
     return [chr(0x2800 + b) if b else " " for b in bits]
 
 
-def glyph_masks(font="/System/Library/Fonts/Menlo.ttc"):
+def glyph_masks(font=FONT):
     """Every printable ASCII glyph, drawn as the card draws it, averaged down to GW x GH."""
     masks = {}
     for code in range(32, 127):
         ch = chr(code)
         text = {"%": "%%", "\\": "\\\\", "@": "\\@"}.get(ch, ch)  # ImageMagick escapes
         # The card puts the baseline 0.8 em down a 1.0 em row, so do the same in a 60 x 100 box.
-        raw = subprocess.run(["magick", "-size", "60x100", "xc:black", "-font", font, "-pointsize", "100",
-                              "-fill", "white", "-annotate", "+0+80", text, "-resize", f"{GW}x{GH}!",
-                              "-depth", "8", "gray:-"], check=True, capture_output=True).stdout
+        try:
+            raw = subprocess.run(["magick", "-size", "60x100", "xc:black", "-font", font, "-pointsize", "100",
+                                  "-fill", "white", "-annotate", "+0+80", text, "-resize", f"{GW}x{GH}!",
+                                  "-depth", "8", "gray:-"], check=True, capture_output=True).stdout
+        except subprocess.CalledProcessError as e:
+            # A font magick cannot load would otherwise be a silent substitution
+            # or a traceback, and every glyph mask would be measured wrong.
+            raise SystemExit(f"--font {font}: {e.stderr.decode(errors='replace').strip().splitlines()[0]}\n"
+                             "give a font path (Linux: .../DejaVuSansMono.ttf) or a name from `magick -list font`")
         masks[ch] = [b / 255 for b in raw]
     return masks
 
@@ -180,7 +189,7 @@ def tint_of(c, floor):
     return None if lum(c) < 0.04 else "#%02x%02x%02x" % tuple(lift(c, floor))
 
 
-def bake(src, cols, pre, tone, color, edges, tol, mono, braille, shape, fill_floor=0.0, largest=False):
+def bake(src, cols, pre, tone, color, edges, tol, mono, braille, shape, fill_floor=0.0, largest=False, font=FONT):
     """pre shapes the picture; tone only steers glyph choice; color only tints."""
     w, h = map(int, run_magick(src, pre, "-format", "%w %h", "info:").split())
     rows = max(1, round(cols * h / w * CHAR_W / LINE_H))
@@ -193,7 +202,7 @@ def bake(src, cols, pre, tone, color, edges, tol, mono, braille, shape, fill_flo
             glyphs, floor = braille_cells(gray, cols, rows, bg), 0.62
         else:
             gray = run_magick(src, pre + tone, "-colorspace", "Gray", "-resize", f"{cols * GW}x{rows * GH}!", "-depth", "8", "gray:-")
-            glyphs, floor = shape_cells(gray, cols, rows, bg, glyph_masks(), fill_floor), 0.42
+            glyphs, floor = shape_cells(gray, cols, rows, bg, glyph_masks(font), fill_floor), 0.42
         if largest:
             glyphs = largest_region(glyphs, cols, rows)
         text = ["".join(glyphs[y * cols:(y + 1) * cols]).rstrip() for y in range(rows)]
@@ -251,6 +260,11 @@ def selfcheck():
     fake["."] = [0.3] * (GW * GH)
     assert shape_cells([0] * (GW * GH), 1, 1, [False], fake, floor=0.35) == ["."]  # dark still drawn
     assert largest_region(list("ab #"), 4, 1) == list("ab  ")
+    try:  # a font magick cannot load says so, by path or by name
+        glyph_masks("DefinitelyMissingMono.ttf")
+        raise AssertionError("missing font should stop the run")
+    except SystemExit as e:
+        assert "DefinitelyMissingMono.ttf" in str(e) and "--font" in str(e)  # names the font and the way out
 
 
 if __name__ == "__main__":
@@ -270,11 +284,12 @@ if __name__ == "__main__":
     ap.add_argument("--saturation", type=int, default=100, help="colour saturation in percent, e.g. 150")
     ap.add_argument("--floor", type=float, default=0, help="--shape: minimum brightness inside the figure, e.g. 0.35")
     ap.add_argument("--largest", action="store_true", help="drop glyph islands cut off from the figure")
+    ap.add_argument("--font", default=FONT, help=f"--shape: monospaced font path or ImageMagick font name (default {FONT})")
     a = ap.parse_args()
     pre = (["-crop", a.crop, "+repage"] if a.crop else []) + (["-fuzz", "8%", "-trim", "+repage"] if a.trim else [])
     tone = (["-sigmoidal-contrast", f"{a.contrast}x50%"] if a.contrast else []) + (["-gamma", str(a.gamma)] if a.gamma else [])
     color = ["-modulate", f"100,{a.saturation}"] if a.saturation != 100 else []
-    text, tint = bake(a.src, a.cols, pre, tone, color, a.edges, a.tol, a.mono, a.braille, a.shape, a.floor, a.largest)
+    text, tint = bake(a.src, a.cols, pre, tone, color, a.edges, a.tol, a.mono, a.braille, a.shape, a.floor, a.largest, a.font)
     (HERE / "art.txt").write_text("\n".join(text) + "\n", encoding="utf-8")
     colors_path = HERE / "art_colors.json"
     if tint:
