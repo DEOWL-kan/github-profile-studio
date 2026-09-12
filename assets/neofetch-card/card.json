@@ -1,0 +1,32 @@
+{
+  "login": "your-login",
+  "name": "Your Name",
+  "role": "Full-Stack Developer",
+  "joined": "2020-01-01",
+  "rows": [
+    [
+      "Uptime",
+      null
+    ],
+    [
+      "Speaks",
+      "English"
+    ]
+  ],
+  "langs": [
+    "Python",
+    "TypeScript"
+  ],
+  "backdrop": "#161b2e",
+  "swatches": [
+    "#0f3d3e",
+    "#1f6f6f",
+    "#2fa39b",
+    "#7fd3c7",
+    "#f3d3b0",
+    "#e8a878",
+    "#c7743f",
+    "#7a3b1f"
+  ],
+  "private_contributions": false
+}
